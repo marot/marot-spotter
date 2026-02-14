@@ -28,29 +28,29 @@ interface EdgeDef {
 }
 
 const nodes: NodeDef[] = [
-  { id: "idea", icon: Lightbulb, label: "Idea", x: 8, y: 12, highlight: false },
+  { id: "idea", icon: Lightbulb, label: "Idea", x: 8, y: 12 },
   { id: "conversation", icon: MessageSquare, label: "Conversation", x: 35, y: 12 },
   { id: "commit", icon: GitCommit, label: "Commit", x: 65, y: 12, highlight: true },
-  { id: "review", icon: Search, label: "Review", x: 50, y: 38, highlight: true },
-  { id: "hotspots", icon: Flame, label: "Code Hotspots", x: 12, y: 64 },
-  { id: "product", icon: Package, label: "Product Changes", x: 35, y: 64 },
-  { id: "transcripts", icon: FileText, label: "Transcripts", sublabel: "rework, failed tools", x: 62, y: 64 },
-  { id: "prompts", icon: RefreshCw, label: "Repetitive Prompts", x: 88, y: 64 },
+  { id: "hotspots", icon: Flame, label: "Code Hotspots", x: 12, y: 38 },
+  { id: "product", icon: Package, label: "Product Changes", x: 35, y: 38 },
+  { id: "transcripts", icon: FileText, label: "Transcripts", sublabel: "rework, failed tools", x: 62, y: 38 },
+  { id: "prompts", icon: RefreshCw, label: "Repetitive Prompts", x: 88, y: 38 },
+  { id: "review", icon: Search, label: "Review", x: 50, y: 64, highlight: true },
   { id: "improvement", icon: Settings, label: "Continuous Improvement", sublabel: "rules, hooks, skills", x: 50, y: 90, highlight: true },
 ];
 
 const edges: EdgeDef[] = [
   { from: "idea", to: "conversation", delay: 0 },
   { from: "conversation", to: "commit", delay: 1.2 },
-  { from: "commit", to: "review", delay: 2.4 },
-  { from: "review", to: "hotspots", delay: 3.6 },
-  { from: "review", to: "product", delay: 3.9 },
-  { from: "review", to: "transcripts", delay: 4.2 },
-  { from: "review", to: "prompts", delay: 4.5 },
-  { from: "hotspots", to: "improvement", delay: 5.4 },
-  { from: "product", to: "improvement", delay: 5.7 },
-  { from: "transcripts", to: "improvement", delay: 6.0 },
-  { from: "prompts", to: "improvement", delay: 6.3 },
+  { from: "commit", to: "hotspots", delay: 2.4 },
+  { from: "commit", to: "product", delay: 2.7 },
+  { from: "commit", to: "transcripts", delay: 3.0 },
+  { from: "commit", to: "prompts", delay: 3.3 },
+  { from: "hotspots", to: "review", delay: 4.2 },
+  { from: "product", to: "review", delay: 4.5 },
+  { from: "transcripts", to: "review", delay: 4.8 },
+  { from: "prompts", to: "review", delay: 5.1 },
+  { from: "review", to: "improvement", delay: 6.0 },
 ];
 
 // Convert percentage positions to SVG coordinates (on a 1000x600 viewBox)
