@@ -5,26 +5,47 @@ import {
   Flame,
   BarChart3,
   Users,
+  PenLine,
+  Wrench,
+  BrainCircuit,
 } from "lucide-react";
 
 const features = [
   {
     icon: MessageSquare,
-    title: "Live Transcript + Terminal Replay",
+    title: "Transcript Visualization",
     description:
-      "Synchronized view of what the agent saw and did. Replay the full conversation alongside terminal output, step by step.",
+      "Browse the full Claude Code transcript alongside terminal output. See exactly what the agent read, thought, and produced — synchronized and searchable.",
+  },
+  {
+    icon: PenLine,
+    title: "Annotations",
+    description:
+      "Annotate transcripts and files directly. Leave notes for yourself or your team on specific agent decisions, code changes, or patterns you want to revisit.",
   },
   {
     icon: GitCommit,
     title: "Session → Commit Lineage",
     description:
-      "Every commit linked back to the conversation that produced it. Confidence scores tell you how much the agent improvised.",
+      "Every commit is linked back to the conversation that produced it. Confidence scores show how much the agent improvised vs. followed instructions.",
+  },
+  {
+    icon: Wrench,
+    title: "Improvement Sessions",
+    description:
+      "Start an improvement session to refine your Claude Code setup — rules, skills, hooks, and tooling. Iterate on your agent workflow based on what you observe.",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Spaced Repetition",
+    description:
+      "A built-in spaced repetition system surfaces past changes on a schedule. Stay on top of everything that was implemented, even across dozens of agent sessions.",
   },
   {
     icon: Flame,
     title: "AI Hotspots",
     description:
-      "ML-scored code snippets ranked by review risk. Stop reading everything — focus on what actually matters.",
+      "ML-scored code snippets ranked by review risk. Focus your attention on the changes that actually need a human eye.",
   },
   {
     icon: BarChart3,
@@ -34,9 +55,9 @@ const features = [
   },
   {
     icon: Users,
-    title: "Subagent Awareness",
+    title: "Subagent Tracking",
     description:
-      "When your agent spawns child agents, Spotter tracks them separately. Drill into each contributor's work independently.",
+      "When your agent spawns child agents, Spotter tracks each one separately. Drill into any contributor's work independently.",
   },
 ];
 
@@ -64,10 +85,10 @@ const Features = () => {
           className="mb-16"
         >
           <h2 className="text-lg font-semibold uppercase tracking-widest text-primary">
-            Capabilities
+            What It Does
           </h2>
           <p className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-            Everything the diff won't tell you.
+            Full context for every agent session.
           </p>
         </motion.div>
 
@@ -76,7 +97,7 @@ const Features = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
           {features.map((feature) => (
             <motion.div

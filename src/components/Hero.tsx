@@ -20,14 +20,14 @@ const Hero = () => {
         </div>
 
         <h1 className="mb-6 text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl">
-          See what your AI agent{" "}
-          <span className="text-gradient">actually did.</span>
+          Know what your AI agents{" "}
+          <span className="text-gradient">actually changed.</span>
         </h1>
 
         <p className="mb-10 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-          Spotter reviews your Claude Code sessions with commit-level
-          intelligence. Replay the conversation, trace every change, catch what
-          the diff can't show you.
+          Spotter visualizes Claude Code transcripts, links commits to
+          conversations, and helps you stay on top of every change — even across
+          4+ parallel agents.
         </p>
 
         <div className="w-full max-w-xl">
