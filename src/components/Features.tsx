@@ -6,9 +6,8 @@ import {
   BarChart3,
   Users,
   PenLine,
-  Wrench,
-  BrainCircuit,
 } from "lucide-react";
+import ScreenshotPlaceholder from "./ScreenshotPlaceholder";
 
 const features = [
   {
@@ -16,62 +15,44 @@ const features = [
     title: "Transcript Visualization",
     description:
       "Browse the full Claude Code transcript alongside terminal output. See exactly what the agent read, thought, and produced — synchronized and searchable.",
+    screenshot: "Screenshot: Transcript View",
   },
   {
     icon: PenLine,
     title: "Annotations",
     description:
       "Annotate transcripts and files directly. Leave notes for yourself or your team on specific agent decisions, code changes, or patterns you want to revisit.",
+    screenshot: "Screenshot: Inline Annotations",
   },
   {
     icon: GitCommit,
     title: "Session → Commit Lineage",
     description:
       "Every commit is linked back to the conversation that produced it. Confidence scores show how much the agent improvised vs. followed instructions.",
-  },
-  {
-    icon: Wrench,
-    title: "Improvement Sessions",
-    description:
-      "Start an improvement session to refine your Claude Code setup — rules, skills, hooks, and tooling. Iterate on your agent workflow based on what you observe.",
-  },
-  {
-    icon: BrainCircuit,
-    title: "Spaced Repetition",
-    description:
-      "A built-in spaced repetition system surfaces past changes on a schedule. Stay on top of everything that was implemented, even across dozens of agent sessions.",
+    screenshot: "Screenshot: Commit Lineage View",
   },
   {
     icon: Flame,
     title: "AI Hotspots",
     description:
       "ML-scored code snippets ranked by review risk. Focus your attention on the changes that actually need a human eye.",
+    screenshot: "Screenshot: Hotspot Risk Scoring",
   },
   {
     icon: BarChart3,
     title: "Co-change Heatmaps",
     description:
-      "Visualize implicit file coupling and churn patterns across sessions. See which files always change together.",
+      "Visualize implicit file coupling and churn patterns across sessions. See which files always change together — even when they shouldn't.",
+    screenshot: "Screenshot: File Coupling Heatmap",
   },
   {
     icon: Users,
     title: "Subagent Tracking",
     description:
       "When your agent spawns child agents, Spotter tracks each one separately. Drill into any contributor's work independently.",
+    screenshot: "Screenshot: Multi-Agent View",
   },
 ];
-
-const container = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
 
 const Features = () => {
   return (
@@ -82,7 +63,7 @@ const Features = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="mb-16"
+          className="mb-20 max-w-2xl"
         >
           <h2 className="text-lg font-semibold uppercase tracking-widest text-primary">
             What It Does
@@ -92,27 +73,47 @@ const Features = () => {
           </p>
         </motion.div>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          {features.map((feature) => (
-            <motion.div
-              key={feature.title}
-              variants={item}
-              className="group rounded-xl border border-glow bg-card p-6 transition-all hover:border-primary/30 hover:bg-surface-elevated"
-            >
-              <feature.icon className="mb-4 h-6 w-6 text-primary" />
-              <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="space-y-24 lg:space-y-32">
+          {features.map((feature, i) => {
+            const isReversed = i % 2 === 1;
+            return (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6 }}
+                className={`grid items-center gap-10 lg:grid-cols-12 lg:gap-16 ${
+                  isReversed ? "" : ""
+                }`}
+              >
+                {/* Text */}
+                <div
+                  className={`lg:col-span-5 ${
+                    isReversed ? "lg:order-2 lg:col-start-8" : "lg:order-1"
+                  }`}
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <feature.icon className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-semibold">{feature.title}</h3>
+                  </div>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+
+                {/* Screenshot */}
+                <div
+                  className={`lg:col-span-7 ${
+                    isReversed ? "lg:order-1 lg:col-start-1" : "lg:order-2 lg:col-start-6"
+                  }`}
+                >
+                  <ScreenshotPlaceholder label={feature.screenshot} />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

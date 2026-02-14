@@ -3,6 +3,19 @@ import { motion } from "framer-motion";
 const Problem = () => {
   return (
     <section className="relative px-6 py-32">
+      {/* Faded code texture */}
+      <div className="pointer-events-none absolute right-8 top-16 select-none font-mono text-[10px] leading-relaxed text-muted-foreground/[0.07] md:text-xs">
+        <pre>{`- async function processQueue(items) {
+-   for (const item of items) {
+-     await handle(item);
+-   }
++ async function processQueue(items) {
++   const results = await Promise.all(
++     items.map(item => handle(item))
++   );
++   return results.filter(Boolean);`}</pre>
+      </div>
+
       <div className="mx-auto max-w-3xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
