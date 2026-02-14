@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import {
   Lightbulb,
   MessageSquare,
@@ -16,99 +16,115 @@ interface NodeDef {
   icon: React.ElementType;
   label: string;
   sublabel?: string;
-  x: number;
-  y: number;
-  highlight?: boolean;
+  cx: number;
+  cy: number;
 }
 
 interface EdgeDef {
   from: string;
   to: string;
-  delay: number;
 }
 
+// All coordinates in a 1000x550 viewBox
 const nodes: NodeDef[] = [
-  { id: "idea", icon: Lightbulb, label: "Idea", x: 8, y: 12 },
-  { id: "conversation", icon: MessageSquare, label: "Conversation", x: 35, y: 12 },
-  { id: "commit", icon: GitCommit, label: "Commit", x: 65, y: 12, highlight: true },
-  { id: "hotspots", icon: Flame, label: "Code Hotspots", x: 12, y: 38 },
-  { id: "product", icon: Package, label: "Product Changes", x: 35, y: 38 },
-  { id: "transcripts", icon: FileText, label: "Transcripts", sublabel: "rework, failed tools", x: 62, y: 38 },
-  { id: "prompts", icon: RefreshCw, label: "Repetitive Prompts", x: 88, y: 38 },
-  { id: "review", icon: Search, label: "Review", x: 50, y: 64, highlight: true },
-  { id: "improvement", icon: Settings, label: "Continuous Improvement", sublabel: "rules, hooks, skills", x: 50, y: 90, highlight: true },
+  { id: "idea", icon: Lightbulb, label: "Idea", cx: 80, cy: 60 },
+  { id: "conversation", icon: MessageSquare, label: "Conversation", cx: 310, cy: 60 },
+  { id: "commit", icon: GitCommit, label: "Commit", cx: 560, cy: 60 },
+  { id: "hotspots", icon: Flame, label: "Code Hotspots", cx: 120, cy: 220 },
+  { id: "product", icon: Package, label: "Product Changes", cx: 370, cy: 220 },
+  { id: "transcripts", icon: FileText, label: "Transcripts", sublabel: "rework, failed tools", cx: 630, cy: 220 },
+  { id: "prompts", icon: RefreshCw, label: "Repetitive Prompts", cx: 880, cy: 220 },
+  { id: "review", icon: Search, label: "Review", cx: 500, cy: 370 },
+  { id: "improvement", icon: Settings, label: "Continuous Improvement", sublabel: "rules, hooks, skills", cx: 500, cy: 500 },
 ];
 
 const edges: EdgeDef[] = [
-  { from: "idea", to: "conversation", delay: 0 },
-  { from: "conversation", to: "commit", delay: 1.2 },
-  { from: "commit", to: "hotspots", delay: 2.4 },
-  { from: "commit", to: "product", delay: 2.7 },
-  { from: "commit", to: "transcripts", delay: 3.0 },
-  { from: "commit", to: "prompts", delay: 3.3 },
-  { from: "hotspots", to: "review", delay: 4.2 },
-  { from: "product", to: "review", delay: 4.5 },
-  { from: "transcripts", to: "review", delay: 4.8 },
-  { from: "prompts", to: "review", delay: 5.1 },
-  { from: "review", to: "improvement", delay: 6.0 },
+  { from: "idea", to: "conversation" },
+  { from: "conversation", to: "commit" },
+  { from: "commit", to: "hotspots" },
+  { from: "commit", to: "product" },
+  { from: "commit", to: "transcripts" },
+  { from: "commit", to: "prompts" },
+  { from: "hotspots", to: "review" },
+  { from: "product", to: "review" },
+  { from: "transcripts", to: "review" },
+  { from: "prompts", to: "review" },
+  { from: "review", to: "improvement" },
 ];
 
-// Convert percentage positions to SVG coordinates (on a 1000x600 viewBox)
-const toSvg = (xPct: number, yPct: number) => ({ x: xPct * 10, y: yPct * 6 });
+// Animation timeline: each step defines which edges fire simultaneously,
+// and which node glows when they arrive
+const timeline: { edges: number[]; glowNode: string; startTime: number; duration: number }[] = [
+  { edges: [], glowNode: "idea", startTime: 0, duration: 0.4 },
+  { edges: [0], glowNode: "conversation", startTime: 0.4, duration: 0.8 },
+  { edges: [1], glowNode: "commit", startTime: 1.2, duration: 0.8 },
+  { edges: [2, 3, 4, 5], glowNode: "", startTime: 2.0, duration: 1.0 },
+  // four nodes glow staggered
+  { edges: [], glowNode: "hotspots", startTime: 2.6, duration: 0.3 },
+  { edges: [], glowNode: "product", startTime: 2.7, duration: 0.3 },
+  { edges: [], glowNode: "transcripts", startTime: 2.8, duration: 0.3 },
+  { edges: [], glowNode: "prompts", startTime: 2.9, duration: 0.3 },
+  { edges: [6, 7, 8, 9], glowNode: "", startTime: 3.2, duration: 1.0 },
+  { edges: [], glowNode: "review", startTime: 4.2, duration: 0.5 },
+  { edges: [10], glowNode: "improvement", startTime: 4.7, duration: 0.8 },
+];
 
-const DiagramNode = ({ node, index }: { node: NodeDef; index: number }) => {
-  const Icon = node.icon;
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.7 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="absolute"
-      style={{
-        left: `${node.x}%`,
-        top: `${node.y}%`,
-        transform: "translate(-50%, -50%)",
-      }}
-    >
-      <div
-        className={`flex flex-col items-center gap-1 rounded-lg border px-3 py-2 text-center transition-all sm:gap-1.5 sm:px-4 sm:py-3 ${
-          node.highlight
-            ? "border-primary/40 bg-primary/10 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]"
-            : "border-border bg-card"
-        }`}
-      >
-        <Icon
-          className={`h-4 w-4 sm:h-5 sm:w-5 ${
-            node.highlight ? "text-primary" : "text-muted-foreground"
-          }`}
-        />
-        <span className="whitespace-nowrap text-[9px] font-medium leading-tight sm:text-xs">
-          {node.label}
-        </span>
-        {node.sublabel && (
-          <span className="whitespace-nowrap text-[8px] leading-tight text-muted-foreground sm:text-[10px]">
-            {node.sublabel}
-          </span>
-        )}
-      </div>
-    </motion.div>
-  );
-};
+const TOTAL_CYCLE = 7; // seconds for full loop
+
+const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
 const FlowDiagram = () => {
-  const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const [time, setTime] = useState(0);
+  const rafRef = useRef<number>(0);
+  const startRef = useRef<number>(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    startRef.current = performance.now();
+    const tick = (now: number) => {
+      const elapsed = (now - startRef.current) / 1000;
+      setTime(elapsed % TOTAL_CYCLE);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [isVisible]);
+
+  // Determine which nodes are glowing
+  const glowingNodes = new Set<string>();
+  for (const step of timeline) {
+    if (step.glowNode && time >= step.startTime && time < step.startTime + step.duration + 0.5) {
+      const progress = (time - step.startTime) / step.duration;
+      if (progress >= 0) glowingNodes.add(step.glowNode);
+    }
+  }
+
+  // Determine edge animation progress (0 = not started, 0-1 = traveling, 1+ = arrived)
+  const edgeProgress: number[] = edges.map((_, i) => {
+    for (const step of timeline) {
+      if (step.edges.includes(i)) {
+        const p = (time - step.startTime) / step.duration;
+        return Math.max(0, Math.min(1, p));
+      }
+    }
+    return -1;
+  });
 
   return (
-    <section className="px-6 py-32">
+    <section ref={sectionRef} className="px-6 py-32">
       <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="mb-6 max-w-2xl"
-        >
+        <div className="mb-6 max-w-2xl">
           <h2 className="text-lg font-semibold uppercase tracking-widest text-primary">
             The Pipeline
           </h2>
@@ -119,124 +135,146 @@ const FlowDiagram = () => {
             Spotter tracks the full lifecycle of every AI-assisted change — from
             the initial prompt through review and back into your tooling.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Diagram container */}
         <div className="relative mx-auto mt-16 overflow-x-auto">
-          <div className="relative mx-auto" style={{ height: 600, minWidth: 700 }}>
-            {/* SVG edges with pulse animations */}
-            <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox="0 0 1000 600"
-              preserveAspectRatio="none"
-              style={{ zIndex: 0 }}
-            >
-              <defs>
-                {/* Pulse dot gradient */}
-                <radialGradient id="pulse-dot">
-                  <stop offset="0%" stopColor="hsl(36 90% 55%)" stopOpacity="1" />
-                  <stop offset="100%" stopColor="hsl(36 90% 55%)" stopOpacity="0" />
-                </radialGradient>
-              </defs>
+          <svg
+            viewBox="0 0 1000 550"
+            className="w-full"
+            style={{ minWidth: 700 }}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="14" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-              {edges.map((edge, i) => {
-                const from = nodeMap[edge.from];
-                const to = nodeMap[edge.to];
-                const p1 = toSvg(from.x, from.y);
-                const p2 = toSvg(to.x, to.y);
-                const edgeId = `edge-${edge.from}-${edge.to}`;
+            {/* Edges */}
+            {edges.map((edge, i) => {
+              const from = nodeMap[edge.from];
+              const to = nodeMap[edge.to];
+              const progress = edgeProgress[i];
+              const isActive = progress > 0;
 
-                return (
-                  <g key={edgeId}>
-                    {/* Static line */}
+              return (
+                <g key={`edge-${i}`}>
+                  {/* Base line */}
+                  <line
+                    x1={from.cx} y1={from.cy}
+                    x2={to.cx} y2={to.cy}
+                    stroke="hsl(36 90% 55% / 0.1)"
+                    strokeWidth="1.5"
+                  />
+                  {/* Active line growing */}
+                  {isActive && (
                     <line
-                      x1={p1.x}
-                      y1={p1.y}
-                      x2={p2.x}
-                      y2={p2.y}
-                      stroke="hsl(36 90% 55% / 0.15)"
-                      strokeWidth="1.5"
-                    />
-                    {/* Animated pulse line overlay */}
-                    <line
-                      x1={p1.x}
-                      y1={p1.y}
-                      x2={p2.x}
-                      y2={p2.y}
+                      x1={from.cx} y1={from.cy}
+                      x2={from.cx + (to.cx - from.cx) * progress}
+                      y2={from.cy + (to.cy - from.cy) * progress}
                       stroke="hsl(36 90% 55% / 0.6)"
                       strokeWidth="2"
-                      strokeDasharray="8 40"
-                      strokeLinecap="round"
-                    >
-                      <animate
-                        attributeName="stroke-dashoffset"
-                        from="48"
-                        to="0"
-                        dur="2s"
-                        begin={`${edge.delay}s`}
-                        repeatCount="indefinite"
-                      />
-                    </line>
-                    {/* Traveling dot */}
-                    <circle r="4" fill="url(#pulse-dot)">
-                      <animateMotion
-                        dur="2s"
-                        begin={`${edge.delay}s`}
-                        repeatCount="indefinite"
-                        path={`M${p1.x},${p1.y} L${p2.x},${p2.y}`}
-                      />
-                      <animate
-                        attributeName="opacity"
-                        values="0;1;1;0"
-                        keyTimes="0;0.1;0.8;1"
-                        dur="2s"
-                        begin={`${edge.delay}s`}
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                  </g>
-                );
-              })}
-
-              {/* Node pulse rings on highlighted nodes */}
-              {nodes
-                .filter((n) => n.highlight)
-                .map((node) => {
-                  const p = toSvg(node.x, node.y);
-                  return (
+                    />
+                  )}
+                  {/* Traveling dot */}
+                  {isActive && progress < 1 && (
                     <circle
-                      key={`ring-${node.id}`}
-                      cx={p.x}
-                      cy={p.y}
-                      r="8"
-                      fill="none"
-                      stroke="hsl(36 90% 55% / 0.4)"
-                      strokeWidth="1.5"
-                    >
-                      <animate
-                        attributeName="r"
-                        values="8;24;8"
-                        dur="3s"
-                        repeatCount="indefinite"
-                      />
-                      <animate
-                        attributeName="opacity"
-                        values="0.5;0;0.5"
-                        dur="3s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                  );
-                })}
-            </svg>
+                      cx={from.cx + (to.cx - from.cx) * progress}
+                      cy={from.cy + (to.cy - from.cy) * progress}
+                      r="4"
+                      fill="hsl(36 90% 55%)"
+                      filter="url(#glow)"
+                    />
+                  )}
+                </g>
+              );
+            })}
 
             {/* Nodes */}
-            <div className="relative h-full" style={{ zIndex: 1 }}>
-              {nodes.map((node, i) => (
-                <DiagramNode key={node.id} node={node} index={i} />
-              ))}
-            </div>
-          </div>
+            {nodes.map((node) => {
+              const isGlowing = glowingNodes.has(node.id);
+              const Icon = node.icon;
+              const halfW = Math.max(60, node.label.length * 5.5 + 20);
+
+              return (
+                <g key={node.id}>
+                  {/* Glow ring */}
+                  {isGlowing && (
+                    <circle
+                      cx={node.cx}
+                      cy={node.cy}
+                      r={halfW + 5}
+                      fill="none"
+                      stroke="hsl(36 90% 55% / 0.3)"
+                      strokeWidth="2"
+                      filter="url(#glow-strong)"
+                    />
+                  )}
+                  {/* Node background */}
+                  <rect
+                    x={node.cx - halfW}
+                    y={node.cy - 28}
+                    width={halfW * 2}
+                    height={node.sublabel ? 56 : 48}
+                    rx="8"
+                    fill={isGlowing ? "hsl(36 90% 55% / 0.12)" : "hsl(0 0% 10%)"}
+                    stroke={isGlowing ? "hsl(36 90% 55% / 0.5)" : "hsl(0 0% 20%)"}
+                    strokeWidth="1"
+                    style={{
+                      transition: "fill 0.3s, stroke 0.3s",
+                    }}
+                  />
+                  {/* Icon placeholder (small circle) */}
+                  <circle
+                    cx={node.cx}
+                    cy={node.cy - 8}
+                    r="8"
+                    fill="none"
+                    stroke={isGlowing ? "hsl(36 90% 55%)" : "hsl(0 0% 40%)"}
+                    strokeWidth="1.5"
+                    style={{ transition: "stroke 0.3s" }}
+                  />
+                  {/* Label */}
+                  <text
+                    x={node.cx}
+                    y={node.cy + 10}
+                    textAnchor="middle"
+                    fill={isGlowing ? "hsl(36 90% 90%)" : "hsl(0 0% 70%)"}
+                    fontSize="11"
+                    fontWeight="500"
+                    fontFamily="system-ui, sans-serif"
+                    style={{ transition: "fill 0.3s" }}
+                  >
+                    {node.label}
+                  </text>
+                  {node.sublabel && (
+                    <text
+                      x={node.cx}
+                      y={node.cy + 23}
+                      textAnchor="middle"
+                      fill="hsl(0 0% 45%)"
+                      fontSize="9"
+                      fontFamily="system-ui, sans-serif"
+                    >
+                      {node.sublabel}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
         </div>
       </div>
     </section>
