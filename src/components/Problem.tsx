@@ -14,10 +14,11 @@ const Problem = () => {
             The Problem
           </h2>
           <p className="text-2xl leading-relaxed text-foreground md:text-3xl">
-            You see the diff. You don't see the{" "}
-            <span className="text-gradient font-semibold">reasoning</span>, the
-            failed attempts, or the three rewrites that happened before the final
-            commit. Reviewing AI-generated code blind is how bugs ship.
+            When you run 4+ agents in parallel, you lose track.{" "}
+            <span className="text-gradient font-semibold">What changed? Why?</span>{" "}
+            The diff doesn't show the reasoning, the failed attempts, or the
+            three rewrites before the final commit. You need the full transcript
+            — annotated and searchable.
           </p>
         </motion.div>
       </div>

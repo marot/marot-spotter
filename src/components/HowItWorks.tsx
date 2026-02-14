@@ -5,21 +5,21 @@ const steps = [
     number: "01",
     title: "Install hooks & start the server",
     description:
-      "One curl command sets up Git hooks and boots the Spotter server. Your workflow stays exactly the same.",
+      "One command sets up Git hooks and boots the Spotter server. Your workflow stays exactly the same.",
     code: "curl -sSL https://spotter.sh/install | bash",
   },
   {
     number: "02",
     title: "Use Claude Code normally",
     description:
-      "Spotter captures sessions, terminal output, and commits in the background. Zero friction, zero config.",
+      "Spotter captures transcripts, terminal output, and commits in the background. Zero friction.",
     code: "claude \"refactor the auth module\"",
   },
   {
     number: "03",
-    title: "Review with full context",
+    title: "Review, annotate, improve",
     description:
-      "Open the dashboard to replay sessions, trace commits to conversations, and spot risky changes before they ship.",
+      "Browse transcripts, annotate decisions, trace commits to conversations. Start improvement sessions to refine your rules and hooks. Use spaced repetition to stay on top of past changes.",
     code: "open http://localhost:4000",
   },
 ];
