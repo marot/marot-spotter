@@ -69,7 +69,8 @@ const FlowDiagram = () => {
         </motion.div>
 
         {/* Diagram container */}
-        <div className="relative mx-auto mt-16 hidden md:block" style={{ height: 520 }}>
+        <div className="relative mx-auto mt-16 overflow-x-auto">
+        <div className="relative mx-auto" style={{ height: 520, minWidth: 700 }}>
           {/* SVG connecting lines */}
           <svg className="absolute inset-0 h-full w-full" style={{ zIndex: 0 }}>
             <defs>
@@ -124,34 +125,6 @@ const FlowDiagram = () => {
             />
           </div>
         </div>
-
-        {/* Mobile: simplified vertical list */}
-        <div className="mt-12 space-y-3 md:hidden">
-          {[
-            { icon: Lightbulb, label: "Idea" },
-            { icon: MessageSquare, label: "Conversation" },
-            { icon: GitCommit, label: "Commit" },
-            { icon: Search, label: "Review" },
-            { icon: Flame, label: "Code Hotspots / Product Changes / Transcripts / Repetitive Prompts" },
-            { icon: Settings, label: "Continuous Improvement — rules, hooks, skills" },
-          ].map((node, i) => (
-            <motion.div
-              key={node.label}
-              initial={{ opacity: 0, x: -15 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="flex items-center gap-3"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card">
-                <node.icon className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-sm text-secondary-foreground">{node.label}</span>
-              {i < 5 && (
-                <span className="ml-auto font-mono text-xs text-muted-foreground/40">→</span>
-              )}
-            </motion.div>
-          ))}
         </div>
       </div>
     </section>
